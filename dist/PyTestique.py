@@ -86,6 +86,16 @@ class PyTestiqueTest:
 
 class PyTestique:
     analytics: PyTestiqueAnalytics
+    pattern: Optional[str]
 
     def __init__(self, cliArgs: List[str], globalContext: Dict[str, any]) -> None:
         self.analytics = PyTestiqueAnalytics()
+        self.pattern = self.processPattern(cliArgs)
+
+    def processPattern(self, cliArgs: List[str]) -> Optional[str]:
+        if not "--select" in cliArgs:
+            return None
+        selectIndex: int = cliArgs.index("--select")
+        if selectIndex is len(cliArgs) - 1:
+            return None
+        return cliArgs[selectIndex + 1]
