@@ -1,5 +1,5 @@
 import time
-from typing import Dict, Optional
+from typing import List, Dict, Optional
 
 
 class PyTestiqueAnalytics:
@@ -20,5 +20,5 @@ class PyTestiqueAnalytics:
 class PyTestique:
     analytics: PyTestiqueAnalytics
 
-    def __init__(self):
+    def __init__(self, cliArgs: List[str], globalContext: Dict[str, any]) -> None:
         self.analytics = PyTestiqueAnalytics()
