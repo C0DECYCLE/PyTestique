@@ -18,7 +18,7 @@ class PyTestiqueAnalytics:
 
     @staticmethod
     def timeFormat(duration: int):
-        return f"{duration * 0.000001} ms"
+        return f"{(duration * 0.000001):.3f} ms"
 
 
 class PyTestiqueTest:
@@ -129,6 +129,7 @@ class PyTestique:
         self.__durationExecutioner = None
         self.__register(globalContext)
         self.__executioner()
+        self.__outputer()
 
     def __processPattern(self, cliArgs: List[str]) -> Optional[str]:
         if not "--select" in cliArgs:
@@ -155,10 +156,52 @@ class PyTestique:
             globalContext.get(f"teardown_{name}"),
         )
 
-    def __executioner(self):
+    def __executioner(self) -> None:
         self.__analytics.timeStart("executioner")
         for name in self.__tests:
             if self.__pattern is not None and self.__pattern not in name:
                 continue
             self.__tests[name].execute()
         self.__durationExecutioner = self.__analytics.timeStop("executioner")
+
+    def __outputer(self) -> None:
+        ranCount: int = (
+            self.__countCompleted("pass")
+            + self.__countCompleted("fail")
+            + self.__countCompleted("setup-error")
+            + self.__countCompleted("test-error")
+            + self.__countCompleted("teardown-error")
+        )
+        print(
+            f"\n"
+            f"Registered {len(self.__tests)} tests in {PyTestiqueAnalytics.timeFormat(self.__durationRegister)}\n"
+            f"Matched {ranCount} with pattern '{self.__pattern}'\n"
+            f"Ran {ranCount} tests in {PyTestiqueAnalytics.timeFormat(self.__durationExecutioner)}\n"
+            f"----------------------------------"
+        )
+        for name in self.__tests:
+            if self.__tests[name].state is None:
+                continue
+            print(
+                f"{self.__tests[name].state} '{name}' ("
+                f"setup {PyTestiqueAnalytics.timeFormat(self.__tests[name].durationSetup)}, "
+                f"test {PyTestiqueAnalytics.timeFormat(self.__tests[name].durationTest)}, "
+                f"teardown {PyTestiqueAnalytics.timeFormat(self.__tests[name].durationTeardown)})"
+            )
+        print(
+            f"----------------------------------\n"
+            f"{self.__countCompleted('pass')} pass, "
+            f"{self.__countCompleted('fail')} fail, "
+            f"{self.__countCompleted('setup-error')} setup error, "
+            f"{self.__countCompleted('test-error')} test error, "
+            f"{self.__countCompleted('teardown-error')} teardown error\n"
+            f"==================================\n"
+        )
+
+    def __countCompleted(self, state: Optional[str]) -> int:
+        count: int = 0
+        for name in self.__tests:
+            if self.__tests[name].state is not state:
+                continue
+            count += 1
+        return count
