@@ -94,6 +94,7 @@ class PyTestique:
         self.__pattern = self.__processPattern(cliArgs)
         self.__tests = {}
         self.__register(globalContext)
+        self.__executioner()
 
     def __processPattern(self, cliArgs: List[str]) -> Optional[str]:
         if not "--select" in cliArgs:
@@ -116,3 +117,9 @@ class PyTestique:
             globalContext.get(f"setup_{name}"),
             globalContext.get(f"teardown_{name}"),
         )
+
+    def __executioner(self):
+        for name in self.__tests:
+            if self.__pattern is not None and self.__pattern not in name:
+                continue
+            self.__tests[name].execute()
