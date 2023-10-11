@@ -22,9 +22,8 @@ class PyTestiqueTest:
     __setup: Callable[[], None]
     __test: Callable[[], None]
     __teardown: Callable[[], None]
-    __state: Optional[
-        str
-    ]  # "pass" | "fail" | "setup-error" | "test-error" | "teardown-error"
+    # "pass" | "fail" | "setup-error" | "test-error" | "teardown-error"
+    __state: Optional[str]
     __duration: float
 
     def __init__(
@@ -46,15 +45,11 @@ class PyTestiqueTest:
         return self.__name
 
     @property
-    def state(
-        self,
-    ) -> Optional[
-        str
-    ]:  # "pass" | "fail" | "setup-error" | "test-error" | "teardown-error"
+    def state(self) -> Optional[str]:
         return self.__state
 
     def execute(self) -> None:
-        if self.__state != None:
+        if self.__state is not None:
             return
         if self.__executeSetup():
             self.__executeTest()
