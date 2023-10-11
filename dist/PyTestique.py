@@ -85,17 +85,34 @@ class PyTestiqueTest:
 
 
 class PyTestique:
-    analytics: PyTestiqueAnalytics
-    pattern: Optional[str]
+    __analytics: PyTestiqueAnalytics
+    __pattern: Optional[str]
+    __tests: Dict[str, PyTestiqueTest]
 
     def __init__(self, cliArgs: List[str], globalContext: Dict[str, any]) -> None:
-        self.analytics = PyTestiqueAnalytics()
-        self.pattern = self.processPattern(cliArgs)
+        self.__analytics = PyTestiqueAnalytics()
+        self.__pattern = self.__processPattern(cliArgs)
+        self.__tests = {}
+        self.__register(globalContext)
 
-    def processPattern(self, cliArgs: List[str]) -> Optional[str]:
+    def __processPattern(self, cliArgs: List[str]) -> Optional[str]:
         if not "--select" in cliArgs:
             return None
         selectIndex: int = cliArgs.index("--select")
         if selectIndex is len(cliArgs) - 1:
             return None
         return cliArgs[selectIndex + 1]
+
+    def __register(self, globalContext: Dict[str, any]) -> None:
+        for name in globalContext:
+            if not name.startswith("test_"):
+                continue
+            self.__registerTest(name[5:], globalContext)
+
+    def __registerTest(self, name: str, globalContext: Dict[str, any]) -> None:
+        self.__tests[name] = PyTestiqueTest(
+            name,
+            globalContext.get(f"test_{name}"),
+            globalContext.get(f"setup_{name}"),
+            globalContext.get(f"teardown_{name}"),
+        )
