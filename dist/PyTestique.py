@@ -2,6 +2,45 @@ import time
 from typing import List, Dict, Optional, Callable
 
 
+class PyTestiqueUtils:
+    green: str = "\033[92m"
+    yellow: str = "\033[93m"
+    red: str = "\033[91m"
+    resetColor: str = "\033[0m"
+
+    @staticmethod
+    def timeFormat(duration: int) -> str:
+        return f"{(duration * 0.000001):.3f} ms"
+
+    @staticmethod
+    def countPercent(value: int, total: int) -> str:
+        return f"{((value / total) * 100):.0f}%"
+
+    @staticmethod
+    def stateColor(state: str) -> str:
+        if state == "pass":
+            return PyTestiqueUtils.green
+        if state == "fail":
+            return PyTestiqueUtils.yellow
+        if "error" in state:
+            return PyTestiqueUtils.red
+        return PyTestiqueUtils.resetColor
+
+    @staticmethod
+    def stateSymbol(state: str) -> str:
+        if state == "pass":
+            return "|"
+        if state == "fail":
+            return "-"
+        if "error" in state:
+            return "x"
+        return "?"
+
+    @staticmethod
+    def print(content: str) -> None:
+        print(content)
+
+
 class PyTestiqueAnalytics:
     def __init__(self) -> None:
         self.__times: Dict[str, int] = {}
@@ -99,11 +138,6 @@ class PyTestiqueTest:
 
 
 class PyTestiqueOutput:
-    green: str = "\033[92m"
-    yellow: str = "\033[93m"
-    red: str = "\033[91m"
-    resetColor: str = "\033[0m"
-
     @staticmethod
     def intro(
         ranCount: int,
@@ -114,21 +148,21 @@ class PyTestiqueOutput:
     ) -> str:
         return (
             f"\n"
-            f"Registered {totalCount} tests in {PyTestiqueOutput.timeFormat(durationRegister)}\n"
+            f"Registered {totalCount} tests in {PyTestiqueUtils.timeFormat(durationRegister)}\n"
             f"Matched {ranCount} with pattern '{pattern}'\n"
-            f"Ran {ranCount} tests in {PyTestiqueOutput.timeFormat(durationExecutioner)}\n"
+            f"Ran {ranCount} tests in {PyTestiqueUtils.timeFormat(durationExecutioner)}\n"
             f"--------------------------------------"
         )
 
     @staticmethod
     def test(name: str, test: PyTestiqueTest) -> str:
         return (
-            f"{PyTestiqueOutput.stateColor(test.state)}"
-            f"{PyTestiqueOutput.stateSymbol(test.state)} {test.state} '{name}' ("
-            f"setup {PyTestiqueOutput.timeFormat(test.durationSetup)}, "
-            f"test {PyTestiqueOutput.timeFormat(test.durationTest)}, "
-            f"teardown {PyTestiqueOutput.timeFormat(test.durationTeardown)})"
-            f"{PyTestiqueOutput.resetColor}"
+            f"{PyTestiqueUtils.stateColor(test.state)}"
+            f"{PyTestiqueUtils.stateSymbol(test.state)} {test.state} '{name}' ("
+            f"setup {PyTestiqueUtils.timeFormat(test.durationSetup)}, "
+            f"test {PyTestiqueUtils.timeFormat(test.durationTest)}, "
+            f"teardown {PyTestiqueUtils.timeFormat(test.durationTeardown)})"
+            f"{PyTestiqueUtils.resetColor}"
         )
 
     @staticmethod
@@ -142,41 +176,13 @@ class PyTestiqueOutput:
     ) -> str:
         return (
             f"--------------------------------------\n"
-            f"{passCount} pass ({PyTestiqueOutput.countPercent(passCount, ranCount)}), "
-            f"{failCount} fail ({PyTestiqueOutput.countPercent(failCount, ranCount)}), "
-            f"{setupErrorCount} setup error ({PyTestiqueOutput.countPercent(setupErrorCount, ranCount)}), "
-            f"{testErrorCount} test error ({PyTestiqueOutput.countPercent(testErrorCount, ranCount)}), "
-            f"{teardownErrorCount} teardown error ({PyTestiqueOutput.countPercent(teardownErrorCount, ranCount)})\n"
+            f"{passCount} pass ({PyTestiqueUtils.countPercent(passCount, ranCount)}), "
+            f"{failCount} fail ({PyTestiqueUtils.countPercent(failCount, ranCount)}), "
+            f"{setupErrorCount} setup error ({PyTestiqueUtils.countPercent(setupErrorCount, ranCount)}), "
+            f"{testErrorCount} test error ({PyTestiqueUtils.countPercent(testErrorCount, ranCount)}), "
+            f"{teardownErrorCount} teardown error ({PyTestiqueUtils.countPercent(teardownErrorCount, ranCount)})\n"
             f"======================================\n"
         )
-
-    @staticmethod
-    def timeFormat(duration: int) -> str:
-        return f"{(duration * 0.000001):.3f} ms"
-
-    @staticmethod
-    def countPercent(value: int, total: int) -> str:
-        return f"{((value / total) * 100):.0f}%"
-
-    @staticmethod
-    def stateColor(state: str) -> str:
-        if state == "pass":
-            return PyTestiqueOutput.green
-        if state == "fail":
-            return PyTestiqueOutput.yellow
-        if "error" in state:
-            return PyTestiqueOutput.red
-        return PyTestiqueOutput.resetColor
-
-    @staticmethod
-    def stateSymbol(state: str) -> str:
-        if state == "pass":
-            return "|"
-        if state == "fail":
-            return "-"
-        if "error" in state:
-            return "x"
-        return "?"
 
 
 class PyTestique:
@@ -255,7 +261,7 @@ class PyTestique:
         )
 
     def __outputerIntro(self, ranCount: int) -> None:
-        print(
+        PyTestiqueUtils.print(
             PyTestiqueOutput.intro(
                 ranCount,
                 len(self.__tests),
@@ -266,7 +272,7 @@ class PyTestique:
         )
 
     def __outputerTest(self, name: str) -> None:
-        print(PyTestiqueOutput.test(name, self.__tests[name]))
+        PyTestiqueUtils.print(PyTestiqueOutput.test(name, self.__tests[name]))
 
     def __outputerOutro(
         self,
@@ -277,7 +283,7 @@ class PyTestique:
         testErrorCount: int,
         teardownErrorCount: int,
     ) -> None:
-        print(
+        PyTestiqueUtils.print(
             PyTestiqueOutput.outro(
                 ranCount,
                 passCount,
