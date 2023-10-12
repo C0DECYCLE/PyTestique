@@ -20,10 +20,24 @@ def setup_bar() -> None:
 
 def test_bar() -> None:
     print("test bar!")
+    raise Exception()
 
 
 def teardown_bar() -> None:
     print("teardown bar!")
+
+
+def setup_foobar() -> None:
+    print("setup foobar!")
+
+
+def test_foobar() -> None:
+    print("test foobar!")
+    assert False
+
+
+def teardown_foobar() -> None:
+    print("teardown foobar!")
 
 
 PyTestique(sys.argv, globals())
