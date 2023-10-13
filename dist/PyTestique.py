@@ -174,7 +174,7 @@ class PyTestiqueOutput:
         testErrorCount: int,
         teardownErrorCount: int,
     ) -> str:
-        def count_percent(count: int):
+        def count_percent(count: int) -> PyTestiqueUtils:
             return PyTestiqueUtils.countPercent(count, ranCount)
 
         return (
