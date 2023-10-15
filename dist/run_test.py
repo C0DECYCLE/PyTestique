@@ -1,5 +1,5 @@
 import sys
-from dist.PyTestique import PyTestique
+from dist.PyTestique import PyTestique, PyTestiqueAsserts
 
 
 def setup_foo() -> None:
@@ -7,7 +7,7 @@ def setup_foo() -> None:
 
 
 def test_foo() -> None:
-    print("test foo!")
+    PyTestiqueAsserts.assertAlmostEqual(6.666666677, 6.666666666699)
 
 
 def teardown_foo() -> None:
