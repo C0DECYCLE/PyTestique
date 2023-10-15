@@ -106,15 +106,15 @@ class PyTestiqueUtils:
     resetColor: str = "\033[0m"
 
     @staticmethod
-    def timeFormat(duration: int) -> str:
-        return f"{(duration * 0.000001):.3f} ms"
+    def timeFormat(nanoSeconds: Optional[int]) -> str:
+        return f"{((nanoSeconds or 0) / 1_000_000):.3f} ms"
 
     @staticmethod
-    def countPercent(value: int, total: int) -> str:
-        return f"{((value / total) * 100):.0f}%"
+    def countPercent(value: Optional[int], total: Optional[int]) -> str:
+        return f"{(((value or 0) / (total or 1)) * 100):.0f}%"
 
     @staticmethod
-    def stateColor(state: str) -> str:
+    def stateColor(state: Optional[str]) -> str:
         if state == "pass":
             return PyTestiqueUtils.green
         if state == "fail":
@@ -124,7 +124,7 @@ class PyTestiqueUtils:
         return PyTestiqueUtils.resetColor
 
     @staticmethod
-    def stateSymbol(state: str) -> str:
+    def stateSymbol(state: Optional[str]) -> str:
         if state == "pass":
             return "|"
         if state == "fail":
@@ -147,8 +147,13 @@ class PyTestiqueAnalytics:
 
     def timeStop(self, name: str) -> Optional[int]:
         if name in self.__times:
-            return time.time_ns() - self.__times[name]
+            previous: int = self.__times[name]
+            self.timeDelete(name)
+            return time.time_ns() - previous
         return None
+
+    def timeDelete(self, name: str) -> None:
+        del self.__times[name]
 
 
 class PyTestiqueTest:
@@ -172,6 +177,10 @@ class PyTestiqueTest:
     def durationTeardown(self) -> Optional[int]:
         return self.__durationTeardown
 
+    @property
+    def errors(self) -> List[BaseException]:
+        return self.__errors
+
     def __init__(
         self,
         analytics: PyTestiqueAnalytics,
@@ -190,61 +199,75 @@ class PyTestiqueTest:
         self.__durationSetup: Optional[int] = None
         self.__durationTest: Optional[int] = None
         self.__durationTeardown: Optional[int] = None
+        self.__errors: List[BaseException] = []
 
     def execute(self) -> None:
         if self.state is not None:
             return
-        self.__analytics.timeStart(f"{self.name}-setup")
-        successfullSetup: bool = self.__executeSetup()
-        self.__durationSetup = self.__analytics.timeStop(f"{self.name}-setup")
-        if successfullSetup:
-            self.__analytics.timeStart(f"{self.name}-test")
+        if self.__executeSetup():
             self.__executeTest()
-            self.__durationTest = self.__analytics.timeStop(f"{self.name}-test")
-            self.__analytics.timeStart(f"{self.name}-teardown")
             self.__executeTeardown()
-            self.__durationTeardown = self.__analytics.timeStop(f"{self.name}-teardown")
 
     def __executeSetup(self) -> bool:
+        timeName: str = f"{self.name}-setup"
         try:
             if self.__setup:
+                self.__analytics.timeStart(timeName)
                 self.__setup()
+                self.__durationSetup = self.__analytics.timeStop(timeName)
             return True
-        except Exception:
+        except BaseException as error:
+            self.__durationSetup = self.__analytics.timeStop(timeName)
+            self.__registerError(error)
             self.__updateState("setup-error")
             return False
 
     def __executeTest(self) -> None:
+        timeName: str = f"{self.name}-test"
         try:
+            self.__analytics.timeStart(timeName)
             self.__test()
+            self.__durationTest = self.__analytics.timeStop(timeName)
             self.__updateState("pass")
         except AssertionError:
+            self.__durationTest = self.__analytics.timeStop(timeName)
             self.__updateState("fail")
-        except Exception:
+        except BaseException as error:
+            self.__durationTest = self.__analytics.timeStop(timeName)
+            self.__registerError(error)
             self.__updateState("test-error")
 
     def __executeTeardown(self) -> None:
+        timeName: str = f"{self.name}-teardown"
         try:
             if self.__teardown:
+                self.__analytics.timeStart(timeName)
                 self.__teardown()
-        except Exception:
+                self.__durationTeardown = self.__analytics.timeStop(timeName)
+        except BaseException as error:
+            self.__durationTeardown = self.__analytics.timeStop(timeName)
+            self.__registerError(error)
             self.__updateState("teardown-error")
 
     def __updateState(self, state: str) -> None:
         self.__state = state
 
+    def __registerError(self, error: BaseException) -> None:
+        self.__errors.append(error)
+
 
 class PyTestiqueOutput:
     @staticmethod
     def intro(
-        ranCount: int,
         totalCount: int,
+        ranCount: int,
         pattern: str,
         durationRegister: int,
         durationExecutioner: int,
     ) -> str:
         return (
             f"\n"
+            f"--------------------------------------\n"
             f"Registered {totalCount} tests in {PyTestiqueUtils.timeFormat(durationRegister)}\n"
             f"Matched {ranCount} with pattern '{pattern}'\n"
             f"Ran {ranCount} tests in {PyTestiqueUtils.timeFormat(durationExecutioner)}\n"
@@ -253,12 +276,16 @@ class PyTestiqueOutput:
 
     @staticmethod
     def test(name: str, test: PyTestiqueTest) -> str:
+        seperator: str = ", "
+        times: List[Optional[str]] = [
+            PyTestiqueOutput.__testTime("setup", test.durationSetup),
+            PyTestiqueOutput.__testTime("test", test.durationTest),
+            PyTestiqueOutput.__testTime("teardown", test.durationTeardown),
+        ]
         return (
             f"{PyTestiqueUtils.stateColor(test.state)}"
             f"{PyTestiqueUtils.stateSymbol(test.state)} {test.state} '{name}' ("
-            f"setup {PyTestiqueUtils.timeFormat(test.durationSetup)}, "
-            f"test {PyTestiqueUtils.timeFormat(test.durationTest)}, "
-            f"teardown {PyTestiqueUtils.timeFormat(test.durationTeardown)})"
+            f"{seperator.join([time for time in times if time is not None])})"
             f"{PyTestiqueUtils.resetColor}"
         )
 
@@ -267,9 +294,8 @@ class PyTestiqueOutput:
         ranCount: int,
         passCount: int,
         failCount: int,
-        setupErrorCount: int,
-        testErrorCount: int,
-        teardownErrorCount: int,
+        errorCount: int,
+        errors: Dict[BaseException, str],
     ) -> str:
         def countPercent(count: int) -> str:
             return PyTestiqueUtils.countPercent(count, ranCount)
@@ -278,11 +304,30 @@ class PyTestiqueOutput:
             f"--------------------------------------\n"
             f"{passCount} pass ({countPercent(passCount)}), "
             f"{failCount} fail ({countPercent(failCount)}), "
-            f"{setupErrorCount} setup error ({countPercent(setupErrorCount)}), "
-            f"{testErrorCount} test error ({countPercent(testErrorCount)}), "
-            f"{teardownErrorCount} teardown error ({countPercent(teardownErrorCount)})\n"
+            f"{errorCount} error ({countPercent(errorCount)})\n"
+            f"{PyTestiqueOutput.__errors(errors) if len(errors) > 0 else ''}"
             f"======================================\n"
         )
+
+    @staticmethod
+    def __testTime(description: str, duration: Optional[int]) -> Optional[str]:
+        return (
+            f"{description} {PyTestiqueUtils.timeFormat(duration)}"
+            if duration is not None
+            else None
+        )
+
+    @staticmethod
+    def __errors(errors: Dict[BaseException, str]) -> str:
+        linebreak: str = "\n"
+        return (
+            f"--------------------------------------\n"
+            f"{linebreak.join([PyTestiqueOutput.__error(errors[e], e) for e in errors])}\n"
+        )
+
+    @staticmethod
+    def __error(name: str, error: BaseException) -> str:
+        return f"'{type(error).__name__}' in test '{name}': '{error}'"
 
 
 class PyTestique:
@@ -292,6 +337,7 @@ class PyTestique:
         self.__tests: Dict[str, PyTestiqueTest] = {}
         self.__durationRegister: Optional[int] = None
         self.__durationExecutioner: Optional[int] = None
+        self.__errors: Dict[BaseException, str] = {}
         self.__register(globalContext)
         self.__executioner()
         self.__outputer()
@@ -327,6 +373,8 @@ class PyTestique:
             if self.__pattern is not None and self.__pattern not in name:
                 continue
             self.__tests[name].execute()
+            for error in self.__tests[name].errors:
+                self.__errors[error] = name
         self.__durationExecutioner = self.__analytics.timeStop("executioner")
 
     def __count(self, state: Optional[str]) -> int:
@@ -343,9 +391,8 @@ class PyTestique:
         setupErrorCount: int = self.__count("setup-error")
         testErrorCount: int = self.__count("test-error")
         teardownErrorCount: int = self.__count("teardown-error")
-        ranCount: int = sum(
-            (passCount, failCount, setupErrorCount, testErrorCount, teardownErrorCount)
-        )
+        errorCount: int = sum((setupErrorCount, testErrorCount, teardownErrorCount))
+        ranCount: int = sum((passCount, failCount, errorCount))
         self.__outputerIntro(ranCount)
         for name in self.__tests:
             if self.__tests[name].state is None:
@@ -355,16 +402,15 @@ class PyTestique:
             ranCount,
             passCount,
             failCount,
-            setupErrorCount,
-            testErrorCount,
-            teardownErrorCount,
+            errorCount,
+            self.__errors,
         )
 
     def __outputerIntro(self, ranCount: int) -> None:
         PyTestiqueUtils.print(
             PyTestiqueOutput.intro(
-                ranCount,
                 len(self.__tests),
+                ranCount,
                 self.__pattern,
                 self.__durationRegister,
                 self.__durationExecutioner,
@@ -379,17 +425,15 @@ class PyTestique:
         ranCount: int,
         passCount: int,
         failCount: int,
-        setupErrorCount: int,
-        testErrorCount: int,
-        teardownErrorCount: int,
+        errorCount: int,
+        errors: Dict[BaseException, str],
     ) -> None:
         PyTestiqueUtils.print(
             PyTestiqueOutput.outro(
                 ranCount,
                 passCount,
                 failCount,
-                setupErrorCount,
-                testErrorCount,
-                teardownErrorCount,
+                errorCount,
+                errors,
             )
         )
