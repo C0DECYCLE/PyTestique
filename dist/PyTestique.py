@@ -174,16 +174,16 @@ class PyTestiqueOutput:
         testErrorCount: int,
         teardownErrorCount: int,
     ) -> str:
-        def count_percent(count: int) -> PyTestiqueUtils:
+        def countPercent(count: int) -> str:
             return PyTestiqueUtils.countPercent(count, ranCount)
 
         return (
             f"--------------------------------------\n"
-            f"{passCount} pass ({count_percent(passCount)}), "
-            f"{failCount} fail ({count_percent(failCount)}), "
-            f"{setupErrorCount} setup error ({count_percent(setupErrorCount)}), "
-            f"{testErrorCount} test error ({count_percent(testErrorCount)}), "
-            f"{teardownErrorCount} teardown error ({count_percent(teardownErrorCount)})\n"
+            f"{passCount} pass ({countPercent(passCount)}), "
+            f"{failCount} fail ({countPercent(failCount)}), "
+            f"{setupErrorCount} setup error ({countPercent(setupErrorCount)}), "
+            f"{testErrorCount} test error ({countPercent(testErrorCount)}), "
+            f"{teardownErrorCount} teardown error ({countPercent(teardownErrorCount)})\n"
             f"======================================\n"
         )
 
