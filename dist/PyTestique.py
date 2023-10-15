@@ -52,7 +52,7 @@ class PyTestiqueAsserts:
         assert not isinstance(a, b)
 
     @staticmethod
-    def assertRaises(exc: Type[Exception], fun: callable, args: tuple, *kwds: Any):
+    def assertRaises(exc: Type[Exception], fun: Callable, args: tuple, *kwds: Any):
         try:
             fun(*args, **kwds)
         except exc:
@@ -61,12 +61,12 @@ class PyTestiqueAsserts:
             raise AssertionError
 
     @staticmethod
-    def assertAlmostEqual(a: float, b: float, after_comma: int = 7):
-        assert round(a - b, after_comma) == 0
+    def assertAlmostEqual(a: float, b: float, afterComma: int = 7):
+        assert round(a - b, afterComma) == 0
 
     @staticmethod
-    def assertNotAlmostEqual(a: float, b: float, after_comma: int = 7):
-        assert round(a - b, int) != 0
+    def assertNotAlmostEqual(a: float, b: float, afterComma: int = 7):
+        assert round(a - b, afterComma) != 0
 
     @staticmethod
     def assertGreater(a: Any, b: Any):

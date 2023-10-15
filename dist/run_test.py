@@ -7,6 +7,7 @@ def setup_foo() -> None:
 
 
 def test_foo() -> None:
+    print("test foo!")
     PyTestiqueAsserts.assertAlmostEqual(6.666666677, 6.666666666699)
 
 
