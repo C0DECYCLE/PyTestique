@@ -1,5 +1,102 @@
 import time
-from typing import List, Dict, Optional, Callable
+from typing import List, Dict, Optional, Callable, Type, Union, Pattern
+
+
+class PyTestiqueAsserts:
+    @staticmethod
+    def assertEqual(a: any, b: any) -> None:
+        assert a == b
+
+    @staticmethod
+    def assertNotEqual(a: any, b: any) -> None:
+        assert a != b
+
+    @staticmethod
+    def assertTrue(x: Union[bool, any]) -> None:
+        assert bool(x) is True
+
+    @staticmethod
+    def assertFalse(x: Union[bool, any]) -> None:
+        assert bool(x) is False
+
+    @staticmethod
+    def assertIs(a: any, b: any) -> None:
+        assert a is b
+
+    @staticmethod
+    def assertIsNot(a: any, b: any) -> None:
+        assert a is not b
+
+    @staticmethod
+    def assertIsNone(x: any) -> None:
+        assert x is None
+
+    @staticmethod
+    def assertIsNotNone(x: any) -> None:
+        assert x is not None
+
+    @staticmethod
+    def assertIn(a: any, b: any) -> None:
+        assert a in b
+
+    @staticmethod
+    def assertNotIn(a: any, b: any) -> None:
+        assert a not in b
+
+    @staticmethod
+    def assertIsInstance(a: any, b: Type) -> None:
+        assert isinstance(a, b)
+
+    @staticmethod
+    def assertNotIsInstance(a: any, b: Type) -> None:
+        assert not isinstance(a, b)
+
+    @staticmethod
+    def assertRaises(
+        exc: Type[Exception], fun: Callable, args: tuple, *kwds: any
+    ) -> None:
+        try:
+            fun(*args, **kwds)
+        except exc:
+            assert True
+        else:
+            raise AssertionError
+
+    @staticmethod
+    def assertAlmostEqual(a: float, b: float, afterComma: int = 7) -> None:
+        assert round(a - b, afterComma) == 0
+
+    @staticmethod
+    def assertNotAlmostEqual(a: float, b: float, afterComma: int = 7) -> None:
+        assert round(a - b, afterComma) != 0
+
+    @staticmethod
+    def assertGreater(a: any, b: any) -> None:
+        assert a > b
+
+    @staticmethod
+    def assertGreaterEqual(a: any, b: any) -> None:
+        assert a >= b
+
+    @staticmethod
+    def assertLess(a: any, b: any) -> None:
+        assert a < b
+
+    @staticmethod
+    def assertLessEqual(a: any, b: any) -> None:
+        assert a <= b
+
+    @staticmethod
+    def assertRegexpMatches(s: str, r: Pattern) -> None:
+        assert r.search(s)
+
+    @staticmethod
+    def assertNotRegexpMatches(s: str, r: Pattern) -> None:
+        assert not r.search(s)
+
+    @staticmethod
+    def assertItemsEqual(a: list, b: list) -> None:
+        assert sorted(a) == sorted(b)
 
 
 class PyTestiqueUtils:
