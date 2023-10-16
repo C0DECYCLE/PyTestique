@@ -195,9 +195,9 @@ class PyTestiqueTest:
         if self.state is not None:
             return
         self.__analytics.timeStart(f"{self.name}-setup")
-        succesfullSetup: bool = self.__executeSetup()
+        successfullSetup: bool = self.__executeSetup()
         self.__durationSetup = self.__analytics.timeStop(f"{self.name}-setup")
-        if succesfullSetup:
+        if successfullSetup:
             self.__analytics.timeStart(f"{self.name}-test")
             self.__executeTest()
             self.__durationTest = self.__analytics.timeStop(f"{self.name}-test")
@@ -210,7 +210,7 @@ class PyTestiqueTest:
             if self.__setup:
                 self.__setup()
             return True
-        except:
+        except Exception:
             self.__updateState("setup-error")
             return False
 
@@ -220,14 +220,14 @@ class PyTestiqueTest:
             self.__updateState("pass")
         except AssertionError:
             self.__updateState("fail")
-        except:
+        except Exception:
             self.__updateState("test-error")
 
     def __executeTeardown(self) -> None:
         try:
             if self.__teardown:
                 self.__teardown()
-        except:
+        except Exception:
             self.__updateState("teardown-error")
 
     def __updateState(self, state: str) -> None:
@@ -271,13 +271,16 @@ class PyTestiqueOutput:
         testErrorCount: int,
         teardownErrorCount: int,
     ) -> str:
+        def countPercent(count: int) -> str:
+            return PyTestiqueUtils.countPercent(count, ranCount)
+
         return (
             f"--------------------------------------\n"
-            f"{passCount} pass ({PyTestiqueUtils.countPercent(passCount, ranCount)}), "
-            f"{failCount} fail ({PyTestiqueUtils.countPercent(failCount, ranCount)}), "
-            f"{setupErrorCount} setup error ({PyTestiqueUtils.countPercent(setupErrorCount, ranCount)}), "
-            f"{testErrorCount} test error ({PyTestiqueUtils.countPercent(testErrorCount, ranCount)}), "
-            f"{teardownErrorCount} teardown error ({PyTestiqueUtils.countPercent(teardownErrorCount, ranCount)})\n"
+            f"{passCount} pass ({countPercent(passCount)}), "
+            f"{failCount} fail ({countPercent(failCount)}), "
+            f"{setupErrorCount} setup error ({countPercent(setupErrorCount)}), "
+            f"{testErrorCount} test error ({countPercent(testErrorCount)}), "
+            f"{teardownErrorCount} teardown error ({countPercent(teardownErrorCount)})\n"
             f"======================================\n"
         )
 
@@ -294,7 +297,7 @@ class PyTestique:
         self.__outputer()
 
     def __processPattern(self, cliArgs: List[str]) -> Optional[str]:
-        if not "--select" in cliArgs:
+        if "--select" not in cliArgs:
             return None
         selectIndex: int = cliArgs.index("--select")
         if selectIndex is len(cliArgs) - 1:
