@@ -146,10 +146,12 @@ class PyTestiqueOutput:
         durationRegister: int,
         durationExecutioner: int,
     ) -> str:
+        withoutPattern: str = "without pattern"
+        withPattern: str = f"with pattern '{pattern}'"
         return (
             f"\n"
             f"Registered {totalCount} tests in {PyTestiqueUtils.timeFormat(durationRegister)}\n"
-            f"Matched {ranCount} with pattern '{pattern}'\n"
+            f"Matched {ranCount} tests {withoutPattern if pattern is None else withPattern}\n"
             f"Ran {ranCount} tests in {PyTestiqueUtils.timeFormat(durationExecutioner)}\n"
             f"--------------------------------------"
         )
