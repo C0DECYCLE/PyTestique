@@ -393,18 +393,11 @@ class PyTestique:
     def __outputer(self) -> None:
         passCount: int = self.__count("pass")
         failCount: int = self.__count("fail")
-        setupErrorCount: int = self.__count("setup-error")
-        testErrorCount: int = self.__count("test-error")
-        teardownErrorCount: int = self.__count("teardown-error")
-        testTestdownErrorCount: int = self.count("test-teardown-error")
-        errorCount: int = sum(
-            (
-                setupErrorCount,
-                testErrorCount,
-                teardownErrorCount,
-                testTestdownErrorCount,
-            )
-        )
+        setupCount: int = self.__count("setup-error")
+        testCount: int = self.__count("test-error")
+        teardownCount: int = self.__count("teardown-error")
+        testTeardownCount: int = self.__count("test-teardown-error")
+        errorCount: int = sum((setupCount, testCount, teardownCount, testTeardownCount))
         ranCount: int = sum((passCount, failCount, errorCount))
         self.__outputerIntro(ranCount)
         for name in self.__tests:
