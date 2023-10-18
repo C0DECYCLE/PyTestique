@@ -2,34 +2,22 @@ import sys
 from dist.PyTestique import PyTestique, PyTestiqueAsserts
 
 
-def setup_foo() -> None:
-    print("setup foo!")
-
-
 def test_foo() -> None:
     print("test foo!")
     PyTestiqueAsserts.assertAlmostEqual(6.666666677, 6.666666666699)
 
 
-def teardown_foo() -> None:
-    print("teardown foo!")
-
-
 def setup_bar() -> None:
     print("setup bar!")
+    raise Exception("Oh fuck! Setup bar exception.")
 
 
 def test_bar() -> None:
     print("test bar!")
-    raise Exception()
 
 
 def teardown_bar() -> None:
     print("teardown bar!")
-
-
-def setup_foobar() -> None:
-    print("setup foobar!")
 
 
 def test_foobar() -> None:
@@ -37,8 +25,14 @@ def test_foobar() -> None:
     assert False
 
 
-def teardown_foobar() -> None:
-    print("teardown foobar!")
+def test_foobarfoo() -> None:
+    print("test foobarfoo!")
+    raise NameError("FooBarFoo weird name.")
+
+
+def teardown_foobarfoo() -> None:
+    print("teardown foobarfoo!")
+    raise Exception("Teardown foobarfoo exception.")
 
 
 PyTestique(sys.argv, globals())
