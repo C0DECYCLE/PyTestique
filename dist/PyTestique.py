@@ -194,7 +194,7 @@ class PyTestiqueTest:
         self.__test: Callable[[], None] = test
         self.__setup: Optional[Callable[[], None]] = setup
         self.__teardown: Optional[Callable[[], None]] = teardown
-        # "pass" | "fail" | "setup-error" | "test-error" | "teardown-error"
+        # "pass" | "fail" | "setup-error" | "test-error" | "teardown-error" | "test-teardown-error"
         self.__state: Optional[str] = None
         self.__durationSetup: Optional[int] = None
         self.__durationTest: Optional[int] = None
@@ -247,7 +247,10 @@ class PyTestiqueTest:
         except BaseException as error:
             self.__durationTeardown = self.__analytics.timeStop(timeName)
             self.__registerError(error)
-            self.__updateState("teardown-error")
+            if self.state is "test-error":
+                self.__updateState("test-teardown-error")
+            else:
+                self.__updateState("teardown-error")
 
     def __updateState(self, state: str) -> None:
         self.__state = state
@@ -393,7 +396,15 @@ class PyTestique:
         setupErrorCount: int = self.__count("setup-error")
         testErrorCount: int = self.__count("test-error")
         teardownErrorCount: int = self.__count("teardown-error")
-        errorCount: int = sum((setupErrorCount, testErrorCount, teardownErrorCount))
+        testTestdownErrorCount: int = self.count("test-teardown-error")
+        errorCount: int = sum(
+            (
+                setupErrorCount,
+                testErrorCount,
+                teardownErrorCount,
+                testTestdownErrorCount,
+            )
+        )
         ranCount: int = sum((passCount, failCount, errorCount))
         self.__outputerIntro(ranCount)
         for name in self.__tests:
