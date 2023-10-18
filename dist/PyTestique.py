@@ -1,5 +1,5 @@
 import time
-from typing import List, Dict, Optional, Callable, Type, Union, Pattern
+from typing import Optional, Callable, Type, Union, Pattern
 
 
 class PyTestiqueAsserts:
@@ -53,7 +53,7 @@ class PyTestiqueAsserts:
 
     @staticmethod
     def assertRaises(
-        exc: Type[Exception], fun: Callable, args: tuple, *kwds: any
+        exc: Type[Exception], fun: Callable, args: tuple[any], *kwds: any
     ) -> None:
         try:
             fun(*args, **kwds)
@@ -95,7 +95,7 @@ class PyTestiqueAsserts:
         assert not r.search(s)
 
     @staticmethod
-    def assertItemsEqual(a: list, b: list) -> None:
+    def assertItemsEqual(a: list[any], b: list[any]) -> None:
         assert sorted(a) == sorted(b)
 
 
@@ -140,7 +140,7 @@ class PyTestiqueUtils:
 
 class PyTestiqueAnalytics:
     def __init__(self) -> None:
-        self.__times: Dict[str, int] = {}
+        self.__times: dict[str, int] = {}
 
     def timeStart(self, name: str) -> None:
         self.__times[name] = time.time_ns()
@@ -178,7 +178,7 @@ class PyTestiqueTest:
         return self.__durationTeardown
 
     @property
-    def errors(self) -> List[BaseException]:
+    def errors(self) -> list[BaseException]:
         return self.__errors
 
     def __init__(
@@ -199,7 +199,7 @@ class PyTestiqueTest:
         self.__durationSetup: Optional[int] = None
         self.__durationTest: Optional[int] = None
         self.__durationTeardown: Optional[int] = None
-        self.__errors: List[BaseException] = []
+        self.__errors: list[BaseException] = []
 
     def execute(self) -> None:
         if self.state is not None:
@@ -247,7 +247,7 @@ class PyTestiqueTest:
         except BaseException as error:
             self.__durationTeardown = self.__analytics.timeStop(timeName)
             self.__registerError(error)
-            if self.state is "test-error":
+            if self.state == "test-error":
                 self.__updateState("test-teardown-error")
             else:
                 self.__updateState("teardown-error")
@@ -268,7 +268,7 @@ class PyTestiqueOutput:
         durationRegister: int,
         durationExecutioner: int,
     ) -> str:
-        withoutPattern: str = "without pattern"
+        withoutPattern: str = "with no pattern"
         withPattern: str = f"with pattern '{pattern}'"
         return (
             f"\n"
@@ -282,7 +282,7 @@ class PyTestiqueOutput:
     @staticmethod
     def test(name: str, test: PyTestiqueTest) -> str:
         seperator: str = ", "
-        times: List[Optional[str]] = [
+        times: list[Optional[str]] = [
             PyTestiqueOutput.__testTime("setup", test.durationSetup),
             PyTestiqueOutput.__testTime("test", test.durationTest),
             PyTestiqueOutput.__testTime("teardown", test.durationTeardown),
@@ -300,7 +300,7 @@ class PyTestiqueOutput:
         passCount: int,
         failCount: int,
         errorCount: int,
-        errors: Dict[BaseException, str],
+        errors: dict[BaseException, str],
     ) -> str:
         def countPercent(count: int) -> str:
             return PyTestiqueUtils.countPercent(count, ranCount)
@@ -323,7 +323,7 @@ class PyTestiqueOutput:
         )
 
     @staticmethod
-    def __errors(errors: Dict[BaseException, str]) -> str:
+    def __errors(errors: dict[BaseException, str]) -> str:
         linebreak: str = "\n"
         return (
             f"--------------------------------------\n"
@@ -336,18 +336,18 @@ class PyTestiqueOutput:
 
 
 class PyTestique:
-    def __init__(self, cliArgs: List[str], globalContext: Dict[str, any]) -> None:
+    def __init__(self, cliArgs: list[str], globalContext: dict[str, any]) -> None:
         self.__analytics: PyTestiqueAnalytics = PyTestiqueAnalytics()
         self.__pattern: Optional[str] = self.__processPattern(cliArgs)
-        self.__tests: Dict[str, PyTestiqueTest] = {}
+        self.__tests: dict[str, PyTestiqueTest] = {}
         self.__durationRegister: Optional[int] = None
         self.__durationExecutioner: Optional[int] = None
-        self.__errors: Dict[BaseException, str] = {}
+        self.__errors: dict[BaseException, str] = {}
         self.__register(globalContext)
         self.__executioner()
         self.__outputer()
 
-    def __processPattern(self, cliArgs: List[str]) -> Optional[str]:
+    def __processPattern(self, cliArgs: list[str]) -> Optional[str]:
         if "--select" not in cliArgs:
             return None
         selectIndex: int = cliArgs.index("--select")
@@ -355,7 +355,7 @@ class PyTestique:
             return None
         return cliArgs[selectIndex + 1]
 
-    def __register(self, globalContext: Dict[str, any]) -> None:
+    def __register(self, globalContext: dict[str, any]) -> None:
         self.__analytics.timeStart("register")
         for name in globalContext:
             if not name.startswith("test_"):
@@ -363,7 +363,7 @@ class PyTestique:
             self.__registerTest(name[5:], globalContext)
         self.__durationRegister = self.__analytics.timeStop("register")
 
-    def __registerTest(self, name: str, globalContext: Dict[str, any]) -> None:
+    def __registerTest(self, name: str, globalContext: dict[str, any]) -> None:
         self.__tests[name] = PyTestiqueTest(
             self.__analytics,
             name,
@@ -432,7 +432,7 @@ class PyTestique:
         passCount: int,
         failCount: int,
         errorCount: int,
-        errors: Dict[BaseException, str],
+        errors: dict[BaseException, str],
     ) -> None:
         PyTestiqueUtils.print(
             PyTestiqueOutput.outro(
