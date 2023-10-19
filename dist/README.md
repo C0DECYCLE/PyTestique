@@ -11,7 +11,16 @@ Key Features:
 Design Decisions:
 Our group decided to try this task as professionally as we can, focusing on industry standard, having a clean github repository and writting clean and scalable code. We started this by meeting up in person and writting our core structure of PyTestique on a whiteboard (Attachment: whiteboard_1.jpg and whiteboard_2.jpg; whiteboard_Pytestique_drawio.png is a more readable version of the whiteboard made with draw.io).
 
-In the end we didn't exactly adapt our strcture form the whiteboard, final version can be seen in the attachments under structure_Pytestique_end_drawio.png, created on draw.io.
+The main take-away in our strcturing of the project was scalability and making it easy for the user to use. So we setteled on a strong object oriented approach. Also we wanted every function to only focus on one thing to improve readability and scalability. We decided that Pytestique adds all tests, runtimes, states, etc. to seperate dictionaries, which then get used in the executioner to return a coherent result for the user. We uesd this approach once more for scalability by easy interaction with the given data.
+
+
+The three of us had experience in Git, so we set up our github repository under https://github.com/C0DECYCLE/PyTestique, settling on naming convention and workflow. We also oppened up issues with things we wanted to implement (later we added more) and formed our Milestone. 
+
+Whilest working on the project, we realized it would be smart to form a seperate PytestiqueUtils Class to insure, that utility functions are in a seperate place. Once more for scalability and clean code.
+
+We kept communicating throughout the process over discord and talking/meeting in person. On GitHub every pull request had to be approved by another member to reduce bugs and improve cleaner code.
+
+In the end we didn't exactly adapt our strcture form the whiteboard but it gave us a good overview off the project. Final structure can be seen in the attachments under structure_Pytestique_end_drawio.png, created on draw.io.
 
 
 How to Use PyTestique:
