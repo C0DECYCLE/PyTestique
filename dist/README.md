@@ -54,7 +54,3 @@ PyTestique is open-source, and contributions are welcome. If you'd like to add n
 
 ## License: 
 See the LICENSE file for more details.
-
-## Conclusion: 
-PyTestique is a simple and lightweight testing framework for Python that aims to make the testing process straightforward and easy to understand. It's a great choice for projects where you want to write tests without the complexity of a full-fledged testing suite. Give it a try, and let us know how it works for your testing needs!
-
