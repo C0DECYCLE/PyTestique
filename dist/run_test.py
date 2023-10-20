@@ -1,6 +1,6 @@
 import os
 import sys
-from dist.PyTestique import PyTestique, PyTestiqueAsserts
+from PyTestique import PyTestique, PyTestiqueAsserts
 from file_manager import read_file, create_file, delete_file
 
 
