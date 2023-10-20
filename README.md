@@ -23,7 +23,3 @@ A innovative Python testing framework founded during the UZH software constructi
 ## Structure
 **Repository level:** Repository, administrative and dev related things. <br>
 **Distribution level:** UZH module assignment. <br>
-
-
-![IMG_8717](https://github.com/C0DECYCLE/PyTestique/assets/18073837/a84e5c23-d552-40a6-a59f-1dbcca76c019)
-![IMG_8716](https://github.com/C0DECYCLE/PyTestique/assets/18073837/3b255c6b-0ed3-4521-987d-4ef3ac884c0e)
