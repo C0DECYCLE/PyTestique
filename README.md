@@ -1,5 +1,5 @@
 # PyTestique
-An innovative Python testing framework founded during the UZH software construction module.
+A Python testing framework founded during the UZH software construction module.
 
 ## Pattern
 **Issue:** "CATEGORY-TYPE: Issue Summary" <br>

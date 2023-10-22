@@ -51,9 +51,3 @@ PyTestique(sys.argv, globals())
 Run it in the command line:
 
 `python example.py --select pattern`
-
-## Contributing: 
-PyTestique is open-source, and contributions are welcome. If you'd like to add new features, improve existing functionality, or fix bugs, feel free to submit pull requests on the project's repository.
-
-## License: 
-See the LICENSE file for more details.
