@@ -14,7 +14,7 @@ An innovative Python testing framework founded during the UZH software construct
 **Commit message:** message: All lower case with first letter uppercase. <br>
 
 ## Workflow
-1. In meating create issues based on roadmap.
+1. In meeting create issues based on roadmap.
 2. Assign issues to members.
 3. Members create branches and commit changes.
 4. Members open pull requests which the others review.
